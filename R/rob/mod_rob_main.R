@@ -1,12 +1,12 @@
 # =============================================================================
-# ROB Main Module - Complete ROB Functionality Wrapper
+# ROB Main Module - Complete ROB Functionality Wrapper (UPDATED)
 # =============================================================================
 
 robMainUI <- function(id) {
   ns <- NS(id)
   
   tagList(
-    # Inline CSS for tabs (same as before)
+    # Inline CSS for tabs
     tags$style(HTML("
       .dataTables_wrapper .dataTables_paginate .paginate_button {
         background: #ffffff !important;
@@ -40,7 +40,6 @@ robMainUI <- function(id) {
     
     # Main Layout
     bslib::layout_sidebar(
-      
       sidebar = bslib::sidebar(
         width = 320,
         open = TRUE,
@@ -64,52 +63,77 @@ robMainUI <- function(id) {
         ),
         
         tags$hr(style = "border-color: #DEE2E6; margin: 20px 0;"),
-        
         plotControlsUI(ns("plot_controls"))
       ),
       
+      # Main content with tabs
       bslib::navset_card_tab(
         id = ns("rob_tabs"),
         
+        # Tab 1: Data Table (UPDATED with Edit & Export)
         bslib::nav_panel(
-          title = "Data Preview",
+          title = "Data Table",
           icon = icon("table"),
           value = "data_tab",
-          
           div(
             style = "padding: 25px;",
             div(
-              style = "margin-bottom: 25px;",
-              h3("Dataset Preview", style = "color: #1d3557; margin-bottom: 10px;"),
-              p("Displaying the first 5 rows", style = "color: #7F8C8D; margin: 0;")
+              style = "margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;",
+              div(
+                h3("Dataset Table", style = "color: #1d3557; margin-bottom: 10px;"),
+                p("View and edit your Risk of Bias data", style = "color: #7F8C8D; margin: 0;")
+              ),
+              div(
+                actionButton(
+                  ns("toggle_edit"),
+                  "Enable Editing",
+                  icon = icon("edit"),
+                  class = "btn-sm",
+                  style = "margin-right: 10px; background: #667eea; color: white; border: none;"
+                ),
+                downloadButton(
+                  ns("download_csv"),
+                  "CSV",
+                  class = "btn-sm",
+                  style = "margin-right: 5px; font-size: 12px;"
+                ),
+                downloadButton(
+                  ns("download_excel"),
+                  "Excel",
+                  class = "btn-sm",
+                  style = "font-size: 12px;"
+                )
+              )
             ),
             div(
               style = "background: white; padding: 20px; border-radius: 8px;",
-              DTOutput(ns("data_preview"))
+              DTOutput(ns("data_table"))
             )
           )
         ),
         
+        # Tab 2: Visualizations
         bslib::nav_panel(
           title = "Visualizations",
           icon = icon("chart-bar"),
           value = "viz_tab",
-          
           div(
             style = "padding: 25px;",
             div(
               style = "margin-bottom: 30px;",
               h3("Risk of Bias Visualizations", style = "color: #1d3557;")
             ),
-            
             div(
               style = "margin-bottom: 40px;",
               plotDisplayUI(ns("plot1"), "Summary Plot")
             ),
-            
             div(
               style = "margin-bottom: 40px;",
               plotDisplayUI(ns("plot2"), "Traffic Light Plot")
+            ),
+            div(
+              style = "margin-bottom: 40px;",
+              plotDisplayUI(ns("plot3"), "Heatmap Plot")  # NEW
             )
           )
         )
@@ -184,33 +208,107 @@ robMainServer <- function(id) {
       plot_controls()$set_type(tool_type)
     })
     
-    # Data preview
-    output$data_preview <- renderDT({
-      req(current_data())
+    # =========================================================================
+    # EDITABLE DATA TABLE (NEW)
+    # =========================================================================
+    
+    # Editable data management
+    edited_data <- reactiveVal(NULL)
+    edit_mode <- reactiveVal(FALSE)
+    
+    # Toggle edit mode
+    observeEvent(input$toggle_edit, {
+      edit_mode(!edit_mode())
+      if (edit_mode()) {
+        updateActionButton(session, "toggle_edit", 
+                           label = "Disable Editing",
+                           icon = icon("save"))
+        showNotification("Edit mode enabled. Click cells to edit.", 
+                         type = "message", duration = 3)
+      } else {
+        updateActionButton(session, "toggle_edit",
+                           label = "Enable Editing",
+                           icon = icon("edit"))
+        showNotification("Changes saved.", type = "message", duration = 2)
+      }
+    })
+    
+    # Update data table with full dataset and edit capability
+    output$data_table <- renderDT({
+      data_to_show <- if (!is.null(edited_data())) {
+        edited_data()
+      } else {
+        req(current_data())
+        current_data()
+      }
       
       datatable(
-        head(current_data(), 5),
+        data_to_show,
+        editable = if(edit_mode()) list(target = "cell", disable = list(columns = 0)) else FALSE,
         options = list(
-          pageLength = 5,
-          lengthChange = FALSE,
+          pageLength = -1,
+          lengthMenu = c(10, 15, 25, 50, 100),
           searching = TRUE,
           info = TRUE,
           scrollX = TRUE,
           paging = TRUE,
           ordering = TRUE,
-          dom = 'ftip',
-          pagingType = 'simple_numbers'
+          dom = 'frtip',
+          buttons = c('copy', 'print'),
+          pagingType = 'full_numbers',
+          columnDefs = list(
+            list(className = 'dt-center', targets = 1:(ncol(data_to_show) - 1))
+          )
         ),
         filter = 'none',
         rownames = FALSE,
-        class = "display compact stripe"
+        class = "display compact stripe hover",
+        style = "bootstrap5"
       )
     })
     
-    # Plot data
+    # Handle cell edits
+    observeEvent(input$data_table_cell_edit, {
+      info <- input$data_table_cell_edit
+      data_copy <- if (!is.null(edited_data())) edited_data() else current_data()
+      data_copy[info$row, info$col] <- info$value
+      edited_data(data_copy)
+    })
+    
+    # CSV Download
+    output$download_csv <- downloadHandler(
+      filename = function() {
+        paste0("rob_data_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv")
+      },
+      content = function(file) {
+        data_to_export <- if (!is.null(edited_data())) edited_data() else current_data()
+        write.csv(data_to_export, file, row.names = FALSE)
+      }
+    )
+    
+    # Excel Download
+    output$download_excel <- downloadHandler(
+      filename = function() {
+        paste0("rob_data_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".xlsx")
+      },
+      content = function(file) {
+        data_to_export <- if (!is.null(edited_data())) edited_data() else current_data()
+        writexl::write_xlsx(data_to_export, file)
+      }
+    )
+    
+    # =========================================================================
+    # PLOT DATA AND SETTINGS
+    # =========================================================================
+    
+    # Plot data (use edited data if available)
     plot_data <- eventReactive(plot_controls()$trigger, {
-      req(current_data())
-      current_data()
+      if (!is.null(edited_data())) {
+        edited_data()
+      } else {
+        req(current_data())
+        current_data()
+      }
     })
     
     plot_settings <- reactive({
@@ -244,7 +342,7 @@ robMainServer <- function(id) {
           "No information" = settings$colors$no_info
         )
         color_map <- color_map[!sapply(color_map, is.null)]
-        symbol_map <- c("Low" = "+", "Moderate" = "~", "Serious" = "−", 
+        symbol_map <- c("Low" = "+", "Moderate" = "~", "Serious" = "−",
                         "Critical" = "×", "No information" = "?")
       } else if (category_type == "5_robins_e") {
         risk_labels <- c("Low", "Some concerns", "High", "Very high", "No information")
@@ -256,7 +354,7 @@ robMainServer <- function(id) {
           "No information" = settings$colors$no_info
         )
         color_map <- color_map[!sapply(color_map, is.null)]
-        symbol_map <- c("Low" = "+", "Some concerns" = "−", "High" = "×", 
+        symbol_map <- c("Low" = "+", "Some concerns" = "−", "High" = "×",
                         "Very high" = "××", "No information" = "?")
       } else {
         risk_labels <- c("Low", "Some concerns", "High", "No information")
@@ -280,7 +378,11 @@ robMainServer <- function(id) {
       list(risk_labels = risk_labels, color_map = color_map, symbol_map = symbol_map)
     })
     
-    # Plot functions
+    # =========================================================================
+    # PLOT FUNCTIONS
+    # =========================================================================
+    
+    # Summary Plot
     plot1_function <- function(data, settings) {
       req(rob_config())
       config <- rob_config()
@@ -295,6 +397,7 @@ robMainServer <- function(id) {
       )
     }
     
+    # Traffic Plot
     plot2_function <- function(data, settings) {
       req(rob_config())
       config <- rob_config()
@@ -311,8 +414,26 @@ robMainServer <- function(id) {
       )
     }
     
+    # Heatmap Plot (NEW)
+    plot3_function <- function(data, settings) {
+      req(rob_config())
+      config <- rob_config()
+      
+      rob_heatmap_plot(
+        df = data,
+        color_map = config$color_map,
+        risk_labels = config$risk_labels,
+        show_row_avg = TRUE,
+        show_col_avg = TRUE,
+        font_size = settings$font_size_summary,
+        show_overall = settings$include_overall_summary
+      )
+    }
+    
     # Initialize plot display modules
     plotDisplayServer("plot1", plot1_function, plot_data, plot_settings)
     plotDisplayServer("plot2", plot2_function, plot_data, plot_settings)
+    plotDisplayServer("plot3", plot3_function, plot_data, plot_settings)  # NEW
+    
   })
 }

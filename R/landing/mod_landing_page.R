@@ -34,7 +34,8 @@ landingPageUI <- function(id) {
           actionButton(
             ns("view_docs"),
             tagList(icon("book"), " Documentation"),
-            class = "btn-hero-secondary"
+            class = "btn-hero-secondary",
+            onclick = "document.querySelector('a.nav-link[data-value=\"docs_tab\"]').click();"
           )
         )
       )
@@ -418,13 +419,12 @@ landingPageServer <- function(id) {
       )
     })
     
-    # View Documentation
+    # View Documentation - Navigate to docs tab
     observeEvent(input$view_docs, {
-      showModal(modalDialog(
-        title = "Documentation",
-        "Documentation coming soon!",
-        easyClose = TRUE
-      ))
+      updateNavbarPage(session = getDefaultReactiveDomain(), 
+                       inputId = "main_navbar", 
+                       selected = "docs_tab")
     })
+    
   })
 }

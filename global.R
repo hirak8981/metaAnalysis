@@ -13,10 +13,13 @@ pacman::p_load(
   shinyjs,
   DT,
   readxl,
+  writexl,
   colourpicker,
   ggplot2,
   dplyr,
-  tidyr
+  tidyr,
+  fs,
+  here
 )
 
 # Set options
@@ -29,6 +32,10 @@ source("R/shared/utils.R")
 # Source landing page
 source("R/landing/mod_landing_page.R")
 
+# Source documentation
+source("R/shared/mod_documentation.R")
+
+
 # Source ROB modules
 source("R/rob/mod_rob_main.R")
 source("R/rob/mod_data_loader.R")
@@ -37,6 +44,7 @@ source("R/rob/mod_plot_controls.R")
 source("R/rob/mod_plot_display.R")
 source("R/rob/mod_rob_summary_plot.R")      # ← Changed: added "mod_"
 source("R/rob/mod_rob_traffic_plot.R")      # ← Changed: added "mod_"
+source("R/rob/mod_rob_heatmap_plot.R")
 source("R/rob/rob_domain_mapper.R")
 source("R/rob/mod_format_helper.R")
 
