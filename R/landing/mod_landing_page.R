@@ -17,8 +17,7 @@ landingPageUI <- function(id) {
         p("Comprehensive Toolkit for Evidence Synthesis",
           class = "hero-subtitle"),
         
-        p("Streamline your systematic reviews with powerful tools for risk of bias assessment, 
-          meta-analysis, and network meta-analysis. Designed for researchers, by researchers.",
+        p("Supporting transparent, reproducible, and methodologically rigorous workflows for risk-of-bias assessment, meta-analysis, and network meta-analysis.",
           class = "hero-description"),
         
         div(
@@ -76,7 +75,7 @@ landingPageUI <- function(id) {
             tags$ul(
               class = "slide-features",
               tags$li("Support for 5 ROB tools (ROB 2, QUADAS-2, QUIPS, ROBINS-I, ROBINS-E)"),
-              tags$li("Interactive summary and traffic light plots"),
+              tags$li("Custom risk-of-bias visualizations"),
               tags$li("Domain-specific risk assessment with full descriptions"),
               tags$li("Custom color schemes and export options"),
               tags$li("Load sample data or upload your own assessments")
@@ -90,10 +89,17 @@ landingPageUI <- function(id) {
             )
           ),
           
+          # Slide 1 visual
           div(
             class = "slide-visual",
-            div(class = "slide-visual-icon", icon("shield-halved"))
-          )
+            div(
+              id = "rob-inner-carousel",
+              class = "inner-carousel",
+              img(src = "rob_heatmap.png",    class = "inner-slide active"),
+              img(src = "rob_trafficlight.png", class = "inner-slide"),
+              img(src = "rob_summary.png",    class = "inner-slide")
+            )
+          ),
         ),
         
         # Slide 2: Meta-Analysis
@@ -108,11 +114,11 @@ landingPageUI <- function(id) {
             
             tags$ul(
               class = "slide-features",
-              tags$li("Forest plots with confidence intervals"),
+              tags$li("Forest plots (fixed and random effects)"),
               tags$li("Funnel plots for publication bias detection"),
-              tags$li("Fixed and random effects models"),
+              tags$li("Subgroup and sensitivity analyses"),
               tags$li("Heterogeneity assessment (I², τ², Q-test)"),
-              tags$li("Subgroup and sensitivity analyses")
+              tags$li("Publication-ready plot exports")
             ),
             
             actionButton(
@@ -123,10 +129,19 @@ landingPageUI <- function(id) {
             )
           ),
           
+          # Slide 2 visual
           div(
             class = "slide-visual",
-            div(class = "slide-visual-icon", icon("chart-line"))
-          )
+            div(
+              id = "meta-inner-carousel",
+              class = "inner-carousel",
+              img(src = "meta_forest.png",  class = "inner-slide active"),
+              img(src = "meta_funnel.png",  class = "inner-slide"),
+              img(src = "meta_sunset.png",  class = "inner-slide"),
+              img(src = "meta_loo.png",     class = "inner-slide")
+            )
+          ),
+          
         ),
         
         # Slide 3: Network Meta-Analysis
@@ -141,11 +156,11 @@ landingPageUI <- function(id) {
             
             tags$ul(
               class = "slide-features",
-              tags$li("Network geometry visualization"),
+              tags$li("Multiple-treatment comparisons in a network"),
               tags$li("League tables for all comparisons"),
               tags$li("SUCRA rankings and cumulative rankograms"),
-              tags$li("Consistency and inconsistency assessment"),
-              tags$li("Node-splitting analysis")
+              tags$li("Consistency and evidence flow diagnostics"),
+              tags$li("Advanced network visualizations")
             ),
             
             actionButton(
@@ -156,10 +171,20 @@ landingPageUI <- function(id) {
             )
           ),
           
+          # Slide 3 visual
           div(
             class = "slide-visual",
-            div(class = "slide-visual-icon", icon("diagram-project"))
-          )
+            div(
+              id = "nma-inner-carousel",
+              class = "inner-carousel",
+              img(src = "nma_network.png",       class = "inner-slide active"),
+              img(src = "nma_directevidence.png",class = "inner-slide"),
+              img(src = "nma_radialrank.png",    class = "inner-slide"),
+              img(src = "nma_inconsistency.png", class = "inner-slide"),
+              img(src = "nma_beading.png",       class = "inner-slide")
+            )
+          ),
+          
         ),
         
         # Indicators at bottom (centered)
@@ -187,7 +212,7 @@ landingPageUI <- function(id) {
         div(
           class = "summary-card",
           h3(icon("bullseye"), " Purpose"),
-          p("MetaSuite is an open-source, web-based platform designed to streamline evidence synthesis workflows for systematic reviews and meta-analyses. Built with R Shiny, it provides researchers with publication-ready visualizations and robust analytical tools following Cochrane and PRISMA guidelines.")
+          p("MetaSuite is an open-source, web-based platform designed to streamline evidence synthesis workflows for systematic reviews and meta-analyses. Built with R Shiny, it provides researchers with publication-ready visualizations and robust analytical tools following Cochrane guidelines.")
         ),
         
         div(
@@ -199,73 +224,168 @@ landingPageUI <- function(id) {
         div(
           class = "summary-card",
           h3(icon("gear"), " Technical Stack"),
-          p(strong("Backend:"), " R (Shiny, bslib, ggplot2, dplyr)", tags$br(),
-            strong("Frontend:"), " HTML5, CSS3, JavaScript", tags$br(),
-            strong("Standards:"), " PRISMA 2020, Cochrane ROB 2.0", tags$br(),
-            strong("License:"), " Open Source (MIT)")
+          p(strong("Backend:"), " R (Shiny, bslib, ggplot2, dplyr, metafor, netmeta, rankinma)", tags$br(),
+            strong("Frontend:"), " Bootstrap 5 (via bslib), HTML5, CSS3, JavaScript", tags$br(),
+            strong("Standards:"), "Cochrane ROB 2.0", tags$br())
         )
       )
     ),
     
     # References Section
+    # References Section
     div(
       class = "references-section",
-      
       h2("Key References", class = "section-title"),
       p("Methodological foundations", class = "section-subtitle"),
-      
       div(
         class = "references-content",
         
+        # Reference 1
         div(
           class = "reference-card",
           div(class = "ref-number", "1"),
           div(
             class = "ref-content",
-            p(strong("Sterne JAC, et al."), " (2019). RoB 2: a revised tool for assessing risk of bias in randomised trials. ", 
-              tags$em("BMJ"), ", 366:l4898.",
+            p(strong("Sterne, J. A. C., Savović, J., Page, M. J., Elbers, R. G., Blencowe, N. S., Boutron, I., … Higgins, J. P. T."), 
+              " (2019). RoB 2: A revised tool for assessing risk of bias in randomised trials. ",
+              tags$em("BMJ"), ", 366, l4898.",
               style = "margin: 0;"),
-            a(href = "https://doi.org/10.1136/bmj.l4898", target = "_blank", 
-              "doi:10.1136/bmj.l4898", class = "ref-link")
+            a(href = "https://doi.org/10.1136/bmj.l4898", target = "_blank",
+              "https://doi.org/10.1136/bmj.l4898", class = "ref-link")
           )
         ),
         
+        # Reference 2
         div(
           class = "reference-card",
           div(class = "ref-number", "2"),
           div(
             class = "ref-content",
-            p(strong("Page MJ, et al."), " (2021). The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. ",
-              tags$em("BMJ"), ", 372:n71.",
+            p(strong("McGuinness, L. A., & Higgins, J. P. T."), 
+              " (2021). Risk-of-bias visualization (robvis): An R package and web app for visualizing risk-of-bias assessments. ",
+              tags$em("Research Synthesis Methods"), ", 12(1), 55–61.",
               style = "margin: 0;"),
-            a(href = "https://doi.org/10.1136/bmj.n71", target = "_blank",
-              "doi:10.1136/bmj.n71", class = "ref-link")
+            a(href = "https://doi.org/10.1002/jrsm.1411", target = "_blank",
+              "https://doi.org/10.1002/jrsm.1411", class = "ref-link")
           )
         ),
         
+        # Reference 3
         div(
           class = "reference-card",
           div(class = "ref-number", "3"),
           div(
             class = "ref-content",
-            p(strong("Whiting PF, et al."), " (2011). QUADAS-2: a revised tool for the quality assessment of diagnostic accuracy studies. ",
-              tags$em("Ann Intern Med"), ", 155(8):529-536.",
+            p(strong("Higgins, J. P. T., Thomas, J., Chandler, J., Cumpston, M., Li, T., Page, M. J., & Welch, V. A. (Eds.)."), 
+              " (2023). Cochrane handbook for systematic reviews of interventions (Version 6.4). Cochrane.",
               style = "margin: 0;"),
-            a(href = "https://doi.org/10.7326/0003-4819-155-8-201110180-00009", target = "_blank",
-              "doi:10.7326/0003-4819-155-8-201110180-00009", class = "ref-link")
+            a(href = "https://training.cochrane.org/handbook", target = "_blank",
+              "https://training.cochrane.org/handbook", class = "ref-link")
           )
         ),
         
+        # Reference 4
         div(
           class = "reference-card",
           div(class = "ref-number", "4"),
           div(
             class = "ref-content",
-            p(strong("Sterne JA, et al."), " (2016). ROBINS-I: a tool for assessing risk of bias in non-randomised studies of interventions. ",
-              tags$em("BMJ"), ", 355:i4919.",
+            p(strong("Viechtbauer, W."), 
+              " (2010). Conducting meta-analyses in R with the metafor package. ",
+              tags$em("Journal of Statistical Software"), ", 36(3), 1–48.",
               style = "margin: 0;"),
-            a(href = "https://doi.org/10.1136/bmj.i4919", target = "_blank",
-              "doi:10.1136/bmj.i4919", class = "ref-link")
+            a(href = "https://doi.org/10.18637/jss.v036.i03", target = "_blank",
+              "https://doi.org/10.18637/jss.v036.i03", class = "ref-link")
+          )
+        ),
+        
+        # Reference 5
+        div(
+          class = "reference-card",
+          div(class = "ref-number", "5"),
+          div(
+            class = "ref-content",
+            p(strong("DerSimonian, R., & Laird, N."), 
+              " (1986). Meta-analysis in clinical trials. ",
+              tags$em("Controlled Clinical Trials"), ", 7(3), 177–188.",
+              style = "margin: 0;"),
+            a(href = "https://doi.org/10.1016/0197-2456(86)90046-2", target = "_blank",
+              "https://doi.org/10.1016/0197-2456(86)90046-2", class = "ref-link")
+          )
+        ),
+        
+        # Reference 6
+        div(
+          class = "reference-card",
+          div(class = "ref-number", "6"),
+          div(
+            class = "ref-content",
+            p(strong("Higgins, J. P. T., Thompson, S. G., Deeks, J. J., & Altman, D. G."), 
+              " (2003). Measuring inconsistency in meta-analyses. ",
+              tags$em("BMJ"), ", 327(7414), 557–560.",
+              style = "margin: 0;"),
+            a(href = "https://doi.org/10.1136/bmj.327.7414.557", target = "_blank",
+              "https://doi.org/10.1136/bmj.327.7414.557", class = "ref-link")
+          )
+        ),
+        
+        # Reference 7
+        div(
+          class = "reference-card",
+          div(class = "ref-number", "7"),
+          div(
+            class = "ref-content",
+            p(strong("Rücker, G., Schwarzer, G., Krahn, U., & König, J."), 
+              " (2015). netmeta: Network meta-analysis using frequentist methods. ",
+              tags$em("The R Journal"), ", 7(2), 315–324.",
+              style = "margin: 0;"),
+            a(href = "https://doi.org/10.32614/RJ-2015-023", target = "_blank",
+              "https://doi.org/10.32614/RJ-2015-023", class = "ref-link")
+          )
+        ),
+        
+        # Reference 8
+        div(
+          class = "reference-card",
+          div(class = "ref-number", "8"),
+          div(
+            class = "ref-content",
+            p(strong("Krahn, U., Binder, H., & König, J."), 
+              " (2013). A graphical tool for locating inconsistency in network meta-analyses. ",
+              tags$em("BMC Medical Research Methodology"), ", 13, Article 35.",
+              style = "margin: 0;"),
+            a(href = "https://doi.org/10.1186/1471-2288-13-35", target = "_blank",
+              "https://doi.org/10.1186/1471-2288-13-35", class = "ref-link")
+          )
+        ),
+        
+        # Reference 9
+        div(
+          class = "reference-card",
+          div(class = "ref-number", "9"),
+          div(
+            class = "ref-content",
+            p(strong("Veroniki, A. A., Straus, S. E., Fyraridis, A., & Tricco, A. C."), 
+              " (2016). The rank-heat plot is a novel way to present the results from a network meta-analysis including multiple outcomes. ",
+              tags$em("Journal of Clinical Epidemiology"), ", 76, 193–199.",
+              style = "margin: 0;"),
+            a(href = "https://doi.org/10.1016/j.jclinepi.2016.02.016", target = "_blank",
+              "https://doi.org/10.1016/j.jclinepi.2016.02.016", class = "ref-link")
+          )
+        ),
+        
+        # Reference 10
+        div(
+          class = "reference-card",
+          div(class = "ref-number", "10"),
+          div(
+            class = "ref-content",
+            p(strong("Chen, C., Chuang, Y.-C., Chan, E., et al."), 
+              " (2023, September 28). Beading plot: A novel graphics for ranking interventions in network evidence (Version 1) [Preprint]. ",
+              tags$em("Research Square"), ".",
+              style = "margin: 0;"),
+            a(href = "https://doi.org/10.21203/rs.3.rs-3370844/v1", target = "_blank",
+              "https://doi.org/10.21203/rs.3.rs-3370844/v1", class = "ref-link")
           )
         )
       )
@@ -287,43 +407,43 @@ landingPageUI <- function(id) {
           div(class = "timeline-marker"),
           div(
             class = "timeline-content",
-            h4(icon("check-circle"), " Phase 1: Foundation (Current)"),
+            h4(icon("check-circle"), " Phase 1: Risk of Bias Foundation"),
             tags$ul(
-              tags$li("Risk of Bias assessment tools (ROB 2, QUADAS-2, QUIPS, ROBINS-I/E)"),
-              tags$li("Interactive visualizations with customizable themes"),
-              tags$li("Data import/export functionality"),
-              tags$li("Publication-ready figure generation")
+              tags$li("Comprehensive ROB assessment (ROB 2, QUADAS-2, QUIPS, ROBINS-I/E)"),
+              tags$li("Customizable ROB visualizations"),
+              tags$li("Flexible data import and export"),
+              tags$li("Publication-ready risk-of-bias figures")
             )
           )
         ),
         
         # Phase 2 - Q1 2025
         div(
-          class = "timeline-item timeline-upcoming",
+          class = "timeline-item timeline-current",
           div(class = "timeline-marker"),
           div(
             class = "timeline-content",
-            h4(icon("clock"), " Phase 2: Meta-Analysis (Q1 2026)"),
+            h4(icon("check-circle"), " Phase 2: MMeta-Analysis Toolkit"),
             tags$ul(
-              tags$li("Forest plot generation with subgroup analysis"),
-              tags$li("Funnel plots for publication bias assessment"),
-              tags$li("Heterogeneity analysis (I², τ², Q-test)"),
-              tags$li("Sensitivity and meta-regression analysis")
+              tags$li("Fixed- and random-effects meta-analysis"),
+              tags$li("Forest plots with subgroup analysis"),
+              tags$li("Funnel plots and publication bias diagnostics"),
+              tags$li("Heterogeneity, sensitivity, and influence analyses")
             )
           )
         ),
         
         # Phase 3 - Q2 2025
         div(
-          class = "timeline-item timeline-future",
+          class = "timeline-item timeline-current",
           div(class = "timeline-marker"),
           div(
             class = "timeline-content",
-            h4(icon("lightbulb"), " Phase 3: Network Meta-Analysis (Q2 2026)"),
+            h4(icon("check-circle"), " Phase 3: Network Meta-Analysis Framework"),
             tags$ul(
-              tags$li("Network geometry visualization"),
+              tags$li("Treatment network visualization"),
               tags$li("League tables and ranking probabilities"),
-              tags$li("SUCRA calculations and rankograms"),
+              tags$li("SUCRA, rankograms, and ranking summaries"),
               tags$li("Consistency and node-splitting analysis")
             )
           )
@@ -335,13 +455,13 @@ landingPageUI <- function(id) {
           div(class = "timeline-marker"),
           div(
             class = "timeline-content",
-            h4(icon("star"), " Phase 4: Advanced Features (Future)"),
+            h4(icon("lightbulb"), " Phase 4: AAdvanced & Integrative Features"),
             tags$ul(
+              tags$li("Meta-regression and advanced moderator analyses"),
+              tags$li("Bayesian network meta-analysis models"),
+              tags$li("Support for additional data types (survival, diagnostic tests)"),
               tags$li("AI-assisted data extraction"),
-              tags$li("Automated report generation"),
-              tags$li("Collaborative workspace for teams"),
-              tags$li("Integration with reference management software"),
-              tags$li("Real-time protocol registration")
+              tags$li("Automated report generation")
             )
           )
         )
@@ -363,16 +483,16 @@ landingPageUI <- function(id) {
         p(
           style = "color: #6C757D; margin: 0; font-size: 14px;",
           "Version 1.0.0 | ",
-          tags$a(href = "https://github.com/yourrepo/metasuite", target = "_blank", 
+          tags$a(href = "https://github.com/hirak8981/metaAnalysis", target = "_blank", 
                  style = "color: #457b9d;", "GitHub Repository"),
           " | ",
-          tags$a(href = "mailto:contact@metasuite.org", 
+          tags$a(href = "mailto:hirak@princepstech.com", 
                  style = "color: #457b9d;", "Contact")
         ),
         
         p(
           style = "color: #6C757D; margin-top: 10px; font-size: 12px;",
-          "© 2025 MetaSuite Contributors | Licensed under MIT"
+          "© 2026 MetaSuite Contributors"
         )
       )
     )

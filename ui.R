@@ -21,8 +21,9 @@ ui <- bslib::page_navbar(
     ),
     tags$script(src = "js/banter-loader.js"),
     tags$script(src = "js/loading-indicator.js"),
-    tags$script(src = "js/carousel.js"),
+    # tags$script(src = "js/carousel.js"),
     tags$script(src = "js/session-handler.js"),
+    tags$script(src = "js/landing-carousel.js"),
     shinyjs::useShinyjs()
   ),
   
