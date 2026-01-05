@@ -80,9 +80,9 @@ Each tool includes:
 - **Heatmaps** – numeric encoding with row/column averages
 
 ### Plot Examples
-![image info](./images/meta_forest.png)
-![image info](./images/meta_funnel.png)
-![image info](./images/meta_sunset.png)
+![image info](./images/rob_trafficlight.png)
+![image info](./images/rob_summary.png)
+![image info](./images/rob_heatmap.png)
 
 All plots support **color customization**, **font scaling**, and **300 DPI export**.
 
@@ -115,6 +115,14 @@ Strict, validated data structures are enforced, with sample datasets available u
 - **Funnel plots** - Detects publication bias
 - **Sunset (power-enhanced) plots** - Assesses statistical power
 - **Influence and leave-one-out diagnostics** - Identifies influential studies and outliers. Provided tests result robustness 
+
+### Plot Examples
+![image info](./images/meta_forest.png)
+![image info](./images/meta_funnel.png)
+![image info](./images/meta_sunset.png)
+\\
+
+
 
 All figures are **customizable** and **exportable at publication quality (300 DPI)**.
 
