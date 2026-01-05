@@ -11,6 +11,8 @@ MetaSuite is intended for:
 - Biostatisticians
 - Evidence synthesis and HTA teams
 
+[Live MetaSuite app](https://hirak-sen-roy.shinyapps.io/metasuite/)
+
 ---
 
 ## 🌐 Application Overview
