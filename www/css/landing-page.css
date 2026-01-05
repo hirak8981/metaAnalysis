@@ -7,25 +7,36 @@
 /* =============================================================================
    HERO SECTION
    ============================================================================= */
+@keyframes heroFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 .hero-section {
   background: linear-gradient(135deg, #1d3557 0%, #457b9d 100%);
-  padding: 100px 20px 80px;
+  padding: 70px 20px 140px;
   text-align: center;
   color: white;
   position: relative;
   overflow: hidden;
 }
 
-.hero-section::before {
+.hero-section::after {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-  opacity: 0.3;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(241, 250, 238, 0.1),
+    rgba(29, 53, 87, 0.4)
+  );
+  pointer-events: none;
 }
 
 .hero-content {
@@ -33,44 +44,50 @@
   z-index: 1;
   max-width: 900px;
   margin: 0 auto;
+  padding: 0 20px; /* Ensure centering on all screen sizes */
 }
 
 .hero-title {
-  font-size: 56px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  letter-spacing: -1px;
-  animation: fadeInUp 0.8s ease-out;
+  font-size: 64px;
+  font-weight: 780;
+  margin-bottom: 16px;
+  letter-spacing: -0.4px;
+  color: #ffffff !important;
+  animation: heroFade 0.6s ease-out both;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .hero-subtitle {
   font-size: 22px;
-  margin-bottom: 15px;
-  opacity: 0.95;
-  font-weight: 400;
-  animation: fadeInUp 0.8s ease-out 0.2s both;
+  margin-bottom: 16px;
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0.97;
+  line-height: 1.6;
+  font-weight: 500;
+  color: rgba(241, 250, 238, 0.95);
+  animation: heroFade 0.7s ease-out 0.15s both;
+}
+
+
+
+.hero-subtitle strong {
+  display: block;
+  font-size: 26px;
+  font-weight: 500;
+  margin-bottom: 6px;
 }
 
 .hero-description {
   font-size: 16px;
-  margin-bottom: 40px;
-  opacity: 0.85;
-  max-width: 700px;
+  margin-bottom: 26px;
+  opacity: 0.88;
+  max-width: 720px;
   margin-left: auto;
   margin-right: auto;
-  line-height: 1.6;
-  animation: fadeInUp 0.8s ease-out 0.4s both;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  line-height: 1.65;
+  animation: heroFade 0.8s ease-out 0.3s both;
 }
 
 /* =============================================================================
@@ -89,36 +106,36 @@
 .btn-hero-primary {
   background: white;
   color: #1d3557;
-  font-weight: 600;
-  padding: 16px 32px;
+  font-weight: 700;
+  padding: 16px 36px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.2);
 }
 
 .btn-hero-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  background: #f1faee;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  background: #1d3557;
 }
 
 .btn-hero-secondary {
   background: transparent;
   color: white;
-  font-weight: 600;
-  padding: 16px 32px;
-  border: 2px solid white;
-  border-radius: 8px;
+  font-weight: 700;
+  padding: 16px 36px;
+  border: 2.5px solid white;
+  border-radius: 10px;
   font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .btn-hero-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   transform: translateY(-2px);
 }
 
@@ -127,8 +144,8 @@
    ============================================================================= */
 
 .carousel-section {
-  max-width: 1400px;
-  margin: -60px auto 60px;
+  max-width: 1300px; 
+  margin: -100px auto 60px; 
   padding: 0 20px;
   position: relative;
   z-index: 10;
@@ -137,10 +154,10 @@
 .carousel-container {
   position: relative;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-  padding: 60px 40px;
+  padding: 45px 30px; 
 }
 
 /* =============================================================================
@@ -154,25 +171,25 @@
   background: rgba(29, 53, 87, 0.9);
   color: white;
   border: none;
-  width: 50px;
-  height: 50px;
+  width: 45px; /* Slightly smaller */
+  height: 45px;
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 20px;
   z-index: 100;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .carousel-nav-left {
-  left: 20px;
+  left: 15px;
 }
 
 .carousel-nav-right {
-  right: 20px;
+  right: 15px;
 }
 
 .carousel-nav-arrow:hover:not(:disabled) {
@@ -235,14 +252,14 @@
 
 .carousel-slide {
   display: none;
-  padding: 40px 60px;
-  min-height: 450px;
+  padding: 25px 40px; 
+  min-height: 380px; 
 }
 
 .carousel-slide.active {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  grid-template-columns: 1.05fr 1fr; 
+  gap: 45px; /* REDUCED gap */
   align-items: center;
   animation: slideIn 0.5s ease-out;
 }
@@ -302,17 +319,54 @@
   flex-shrink: 0;
 }
 
-.slide-visual {
+slide-visual {
   background: linear-gradient(135deg, #E8F4F8 0%, #f8f9fa 100%);
   border-radius: 12px;
-  padding: 40px;
+  padding: 35px; 
   text-align: center;
   border: 2px solid #e0e0e0;
-  min-height: 350px;
+  min-height: 480px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+    box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),          
+    0 4px 16px rgba(29, 53, 87, 0.06),      
+    inset 0 1px 2px rgba(255, 255, 255, 0.5); 
+}
+
+.inner-carousel {
+  position: relative;
+  width: 100%;
+  height: 420px; 
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
+.inner-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  max-width: 96%;
+  max-height: 96%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  border-radius: 6px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+.inner-slide.active {
+  opacity: 1;
+}
+
 
 .slide-visual-icon {
   font-size: 120px;
@@ -339,6 +393,7 @@
   background: #457b9d;
   transform: translateX(5px);
 }
+
 
 /* =============================================================================
    APP SUMMARY SECTION
@@ -581,17 +636,48 @@
    ============================================================================= */
 
 @media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 20px 80px; /* Adjusted for mobile */
+  }
+  
   .hero-title {
-    font-size: 36px;
+    font-size: 42px;
   }
   
   .hero-subtitle {
-    font-size: 18px;
+    font-size: 20px;
+  }
+  
+  .hero-description {
+    font-size: 16px;
+  }
+  
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    padding: 16px 32px;
+    font-size: 16px;
+  }
+  
+  .carousel-section {
+    margin: -40px auto 40px; /* Less overlap on mobile */
+  }
+  
+  .carousel-slide {
+    padding: 30px 20px;
+    min-height: auto;
   }
   
   .carousel-slide.active {
     grid-template-columns: 1fr;
-    padding: 40px 30px;
+    gap: 30px;
+  }
+  
+  .slide-visual {
+    min-height: 320px;
+  }
+  
+  .inner-carousel {
+    height: 280px;
   }
   
   .carousel-nav-left {
@@ -606,39 +692,6 @@
     width: 40px;
     height: 40px;
     font-size: 18px;
-  }
-  
-  .slide-visual {
-    min-height: 250px;
-  }
-  
-  .slide-content h2 {
-    font-size: 28px;
-  }
-  
-  .section-title {
-    font-size: 32px;
-  }
-  
-  .summary-content {
-    grid-template-columns: 1fr;
-  }
-  
-  .reference-card {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .timeline-container {
-    padding-left: 30px;
-  }
-  
-  .timeline-marker {
-    left: -23px;
-  }
-  
-  .timeline-content {
-    margin-left: 10px;
   }
 }
 

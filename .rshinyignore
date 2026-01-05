@@ -1,0 +1,51 @@
+# renv library files (will be reconstructed from renv.lock)
+renv/library/
+renv/staging/
+renv/python/
+
+# Git files
+.git/
+.gitignore
+
+# RStudio project files
+.Rproj.user/
+*.Rproj
+.Rhistory
+.RData
+.Ruserdata
+
+# Documentation
+README.md
+README.Rmd
+
+# Development files
+tests/
+docs/
+vignettes/
+man/
+
+# Environment files
+.Renviron
+.env
+
+# Deployment logs (avoid recursive uploads)
+rsconnect/
+
+# Temporary files
+*.tmp
+*.log
+*~
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.o
+*.so
+*.dll
+src/*.o
+src/*.so
+
+# Package development
+.Rbuildignore
+LICENSE
+NAMESPACE

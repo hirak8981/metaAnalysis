@@ -36,14 +36,55 @@ robMainUI <- function(id) {
         font-weight: 600;
         text-align: center;
       }
-    ")),
+      
+      .bslib-sidebar-layout > .sidebar {
+        background: linear-gradient(180deg, 
+          #F8F9FA 0%,           /* Light gray (top - clean) */
+          #DDE1E6 60%,          /* Your existing mid-gray */
+          #DDE7ED 85%,          /* Barely-there blue tint */
+          #D8E3EA 100%          /* Very subtle brand blue hint */
+        ) !important;
+      }
+      
+      /* All sidebar .btn-block have same width & height */
+      .bslib-sidebar-layout > .sidebar .btn-block {
+        width: 100% !important;
+        min-height: 50px !important;
+        padding: 10px 18px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+      }
+    
+      /* Icon–text spacing for all sidebar buttons */
+      .bslib-sidebar-layout > .sidebar .btn i {
+        margin-right: 8px !important;
+      }"
+      )),
     
     # Main Layout
     bslib::layout_sidebar(
       sidebar = bslib::sidebar(
-        width = 320,
+        width = 330,
         open = TRUE,
-        bg = "#FAFBFC",
+        
+        div(
+          style = "margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #DEE2E6;",
+          actionButton(
+            ns("reset_rob"),
+            "Reset Module",
+            icon = icon("rotate-right"),
+            class = "btn-outline-danger btn-block",
+            style = "font-weight: 600; font-size: 14px; padding: 10px;"
+          ),
+          tags$small(
+            style = "color: #6c757d; display: block; margin-top: 8px; text-align: center;",
+            "Clear all data and return to initial state"
+          )
+        ),
         
         dataLoaderUI(ns("data_loader")),
         tags$hr(style = "border-color: #DEE2E6; margin: 20px 0;"),
@@ -51,18 +92,31 @@ robMainUI <- function(id) {
         fileUploadUI(ns("file_upload")),
         tags$hr(style = "border-color: #DEE2E6; margin: 20px 0;"),
         
+        
         div(
-          style = "margin-bottom: 20px;",
+          style = "margin-bottom: 20px;",  
           actionButton(
             ns("generate_plots_main"),
             "Generate Plots",
             icon = icon("chart-bar"),
-            class = "btn-primary btn-block",
-            style = "font-weight: 600; font-size: 16px; padding: 12px;"
+            class = "btn-primary btn-block"
           )
         ),
         
+        
         tags$hr(style = "border-color: #DEE2E6; margin: 20px 0;"),
+        
+        # Plot Customization Button
+        div(
+          style = "margin-bottom: 20px;",  
+          actionButton(
+            ns("customize_plots"),
+            "Plot Customization",
+            icon = icon("palette"),
+            class = "btn-outline-primary btn-block"
+          )
+        ),
+        
         plotControlsUI(ns("plot_controls"))
       ),
       
@@ -70,7 +124,7 @@ robMainUI <- function(id) {
       bslib::navset_card_tab(
         id = ns("rob_tabs"),
         
-        # Tab 1: Data Table (UPDATED with Edit & Export)
+        # Tab 1: Data Table 
         bslib::nav_panel(
           title = "Data Table",
           icon = icon("table"),
@@ -142,27 +196,160 @@ robMainUI <- function(id) {
   )
 }
 
+
 robMainServer <- function(id) {
   moduleServer(id, function(input, output, session) {
     
     # Initialize sub-modules
+    edited_data <- reactiveVal(NULL)
+    edit_mode <- reactiveVal(FALSE)
+    validation_shown <- reactiveVal(FALSE)
+    reset_file_trigger <- reactiveVal(0)  # NEW: Counter for file reset
+    plots_ready <- reactiveVal(FALSE) 
+    
+    # Initialize sub-modules AFTER reactive values
     loaded_data <- dataLoaderServer("data_loader", rob_folder = "data/rob")
-    uploaded_file <- fileUploadServer("file_upload")
-    plot_controls <- plotControlsServer("plot_controls")
+    uploaded_file <- fileUploadServer("file_upload", reset_trigger = reactive(reset_file_trigger()))
+    plot_controls <- plotControlsServer("plotcontrols")
+    
+
     
     # Connect main generate button to plot controls
     observeEvent(input$generate_plots_main, {
       bslib::nav_select("rob_tabs", selected = "viz_tab")
+      plots_ready(TRUE)                                # NEW
       plot_controls()$trigger_generation()
     })
+
     
-    # Current data management
+    # Reset function for invalid data
+    reset_rob_state <- function() {
+      edited_data(NULL)
+      edit_mode(FALSE)
+      plots_ready(FALSE)                               # NEW
+      updateActionButton(session, "toggle_edit",
+                         label = "Enable Editing",
+                         icon = icon("edit"))
+      reset_file_trigger(reset_file_trigger() + 1)
+    }
+    
+    
+    # =========================================================================
+    # RESET BUTTON HANDLER (SINGLE VERSION - NO DUPLICATES)
+    # =========================================================================
+    
+    observeEvent(input$reset_rob, {
+      showModal(
+        modalDialog(
+          title = tagList(
+            icon("exclamation-triangle", style = "color: #dc3545;"),
+            " Reset ROB Module?"
+          ),
+          
+          div(
+            style = "padding: 10px;",
+            p(
+              "This will clear all your work and return the module to its initial state:",
+              style = "margin-bottom: 15px; font-size: 15px;"
+            ),
+            tags$ul(
+              style = "color: #5a6169; margin-bottom: 15px;",
+              tags$li("Remove uploaded files"),
+              tags$li("Clear all data edits"),
+              tags$li("Clear all visualizations"),
+              tags$li("Deselect current dataset")
+            ),
+            p(
+              strong("This action cannot be undone."),
+              style = "color: #dc3545; margin: 0;"
+            )
+          ),
+          
+          footer = tagList(
+            modalButton("Cancel", icon = icon("times")),
+            actionButton(
+              session$ns("confirm_reset"),
+              "Yes, Reset Module",
+              icon = icon("rotate-right"),
+              class = "btn-danger"
+            )
+          ),
+          
+          size = "m",
+          easyClose = TRUE,
+          fade = TRUE
+        )
+      )
+    })
+    
+    # SINGLE confirm reset handler
+    # Confirm reset
+    observeEvent(input$confirm_reset, {
+      removeModal()
+      
+      # Reset all reactive values
+      edited_data(NULL)
+      validation_shown(FALSE)
+      edit_mode(FALSE)
+      plots_ready(FALSE) 
+      
+      # Trigger file upload reset (CHANGED)
+      reset_file_trigger(reset_file_trigger() + 1)
+      
+      # Update UI elements
+      updateActionButton(session, "toggle_edit",
+                         label = "Enable Editing",
+                         icon = icon("edit"))
+      
+      # Clear dataset selection
+      updateSelectInput(session, "data_loader-selected_dataset", selected = character(0))
+      
+      # Switch to data tab
+      bslib::nav_select("rob_tabs", selected = "data_tab")
+      
+      # Show notification
+      showNotification(
+        "ROB module reset complete. Please select a dataset or upload a file.",
+        type = "message",
+        duration = 3,
+        closeButton = TRUE
+      )
+    })
+    
+    
+    # =========================================================================
+    # CURRENT DATA WITH VALIDATION
+    # =========================================================================
+    
     current_data <- reactive({
-      if (!is.null(uploaded_file()$data)) {
+      raw_data <- if (!is.null(uploaded_file()$data)) {
         uploaded_file()$data
       } else {
         loaded_data()$current_data
       }
+      
+      if (is.null(raw_data)) {
+        return(NULL)
+      }
+      
+      if (nrow(raw_data) == 0) {
+        return(raw_data)
+      }
+      
+      validation_result <- validate_rob_data(raw_data)
+      
+      if (!validation_result$valid) {
+        if (!isTRUE(isolate(validation_shown()))) {
+          show_validation_error(validation_result$errors)
+          validation_shown(TRUE)
+        }
+        reset_rob_state()
+        return(NULL)
+      } else {
+        validation_shown(FALSE)
+      }
+      
+      return(raw_data)
     })
     
     # Get current tool name
@@ -185,6 +372,8 @@ robMainServer <- function(id) {
     })
     
     # Auto-detect tool type
+    # Replace the auto-detect observer with this COMPLETE version:
+    
     observe({
       req(current_data())
       df <- current_data()
@@ -197,33 +386,40 @@ robMainServer <- function(id) {
         tolower() %>%
         as.character()
       
-      tool_type <- if ("moderate" %in% all_values && "serious" %in% all_values && "critical" %in% all_values) {
-        "5_robins_i"
+      # Detect tool type based on unique values
+      tool_type <- if ("unclear" %in% all_values && !("moderate" %in% all_values) && !("some concerns" %in% all_values)) {
+        "3_quadas"  # QUADAS-2: Low, High, Unclear
+      } else if ("moderate" %in% all_values && "serious" %in% all_values && "critical" %in% all_values) {
+        "5_robins_i"  # ROBINS-I: Low, Moderate, Serious, Critical, No information
       } else if ("very high" %in% all_values || "very_high" %in% all_values) {
-        "5_robins_e"
+        "5_robins_e"  # ROBINS-E: Low, Some Concerns, High, Very High, No information
+      } else if ("moderate" %in% all_values && !("serious" %in% all_values)) {
+        "4_quips"  # QUIPS: Low, Moderate, High, No information
       } else {
-        "4_category"
+        "4_category"  # ROB 2: Low, Some Concerns, High, No information (default)
       }
       
       plot_controls()$set_type(tool_type)
     })
     
-    # =========================================================================
-    # EDITABLE DATA TABLE (NEW)
-    # =========================================================================
     
-    # Editable data management
-    edited_data <- reactiveVal(NULL)
-    edit_mode <- reactiveVal(FALSE)
+    # ADD THIS OBSERVER:
+    observeEvent(input$customize_plots, {
+      plot_controls()$show_modal()
+    })
+    # =========================================================================
+    # EDITABLE DATA TABLE
+    # =========================================================================
     
     # Toggle edit mode
     observeEvent(input$toggle_edit, {
       edit_mode(!edit_mode())
+      
       if (edit_mode()) {
-        updateActionButton(session, "toggle_edit", 
+        updateActionButton(session, "toggle_edit",
                            label = "Disable Editing",
                            icon = icon("save"))
-        showNotification("Edit mode enabled. Click cells to edit.", 
+        showNotification("Edit mode enabled. Click cells to edit.",
                          type = "message", duration = 3)
       } else {
         updateActionButton(session, "toggle_edit",
@@ -246,7 +442,7 @@ robMainServer <- function(id) {
         data_to_show,
         editable = if(edit_mode()) list(target = "cell", disable = list(columns = 0)) else FALSE,
         options = list(
-          pageLength = -1,
+          pageLength = 15,
           lengthMenu = c(10, 15, 25, 50, 100),
           searching = TRUE,
           info = TRUE,
@@ -275,6 +471,7 @@ robMainServer <- function(id) {
       edited_data(data_copy)
     })
     
+    
     # CSV Download
     output$download_csv <- downloadHandler(
       filename = function() {
@@ -301,8 +498,8 @@ robMainServer <- function(id) {
     # PLOT DATA AND SETTINGS
     # =========================================================================
     
-    # Plot data (use edited data if available)
-    plot_data <- eventReactive(plot_controls()$trigger, {
+    plot_data <- reactive({
+      req(plots_ready())          # Only allow if Generate Plots was clicked
       if (!is.null(edited_data())) {
         edited_data()
       } else {
@@ -311,12 +508,24 @@ robMainServer <- function(id) {
       }
     })
     
+    observeEvent(input$rob_tabs, {
+      if (identical(input$rob_tabs, "viz_tab") && !isTRUE(plots_ready())) {
+        showNotification(
+          HTML("<strong>Plots not generated yet.</strong><br>
+           Please click the <em>Generate Plots</em> button in the sidebar to create visualizations."),
+          type = "warning",
+          duration = 5,
+          closeButton = TRUE
+        )
+      }
+    })
+    
     plot_settings <- reactive({
       req(plot_controls())
       plot_controls()
     })
     
-    # ROB configuration
+    # ROB configuration (UPDATED - Add QUADAS and QUIPS)
     rob_config <- reactive({
       req(plot_data())
       req(plot_settings())
@@ -330,9 +539,32 @@ robMainServer <- function(id) {
         unlist() %>%
         unique() %>%
         na.omit() %>%
+        tolower() %>%
         as.character()
       
-      if (category_type == "5_robins_i") {
+      # QUADAS-2: 3 categories (Low, High, Unclear)
+      if ("unclear" %in% all_values && !("moderate" %in% all_values) && !("some concerns" %in% all_values)) {
+        risk_labels <- c("Low", "High", "Unclear")
+        color_map <- c(
+          "Low" = settings$colors$low,
+          "High" = settings$colors$high,
+          "Unclear" = "#F39C12"
+        )
+        color_map <- color_map[!sapply(color_map, is.null)]
+        symbol_map <- c("Low" = "+", "High" = "×", "Unclear" = "?")
+        
+      } else if ("moderate" %in% all_values && !("serious" %in% all_values) && !("critical" %in% all_values)) {
+        risk_labels <- c("Low", "Moderate", "High", "No information")
+        color_map <- c(
+          "Low" = settings$colors$low,
+          "Moderate" = settings$colors$moderate,
+          "High" = settings$colors$high,
+          "No information" = settings$colors$no_info
+        )
+        color_map <- color_map[!sapply(color_map, is.null)]
+        symbol_map <- c("Low" = "+", "Moderate" = "~", "High" = "×", "No information" = "?")
+        
+      } else if (category_type == "5_robins_i" || ("moderate" %in% all_values && "serious" %in% all_values && "critical" %in% all_values)) {
         risk_labels <- c("Low", "Moderate", "Serious", "Critical", "No information")
         color_map <- c(
           "Low" = settings$colors$low,
@@ -344,7 +576,8 @@ robMainServer <- function(id) {
         color_map <- color_map[!sapply(color_map, is.null)]
         symbol_map <- c("Low" = "+", "Moderate" = "~", "Serious" = "−",
                         "Critical" = "×", "No information" = "?")
-      } else if (category_type == "5_robins_e") {
+        
+      } else if (category_type == "5_robins_e" || ("very high" %in% all_values || "very_high" %in% all_values)) {
         risk_labels <- c("Low", "Some concerns", "High", "Very high", "No information")
         color_map <- c(
           "Low" = settings$colors$low,
@@ -356,6 +589,7 @@ robMainServer <- function(id) {
         color_map <- color_map[!sapply(color_map, is.null)]
         symbol_map <- c("Low" = "+", "Some concerns" = "−", "High" = "×",
                         "Very high" = "××", "No information" = "?")
+        
       } else {
         risk_labels <- c("Low", "Some concerns", "High", "No information")
         color_map <- c(
@@ -368,7 +602,7 @@ robMainServer <- function(id) {
         symbol_map <- c("Low" = "+", "Some concerns" = "−", "High" = "×", "No information" = "?")
       }
       
-      risk_labels <- intersect(risk_labels, all_values)
+      risk_labels <- intersect(risk_labels, unique(df %>% select(-Study) %>% unlist() %>% na.omit()))
       
       if (length(color_map) == 0) {
         showNotification("No colors available. Please check color picker inputs.", type = "error")
@@ -382,7 +616,6 @@ robMainServer <- function(id) {
     # PLOT FUNCTIONS
     # =========================================================================
     
-    # Summary Plot
     plot1_function <- function(data, settings) {
       req(rob_config())
       config <- rob_config()
@@ -397,7 +630,6 @@ robMainServer <- function(id) {
       )
     }
     
-    # Traffic Plot
     plot2_function <- function(data, settings) {
       req(rob_config())
       config <- rob_config()
@@ -414,7 +646,6 @@ robMainServer <- function(id) {
       )
     }
     
-    # Heatmap Plot (NEW)
     plot3_function <- function(data, settings) {
       req(rob_config())
       config <- rob_config()
@@ -430,10 +661,9 @@ robMainServer <- function(id) {
       )
     }
     
-    # Initialize plot display modules
     plotDisplayServer("plot1", plot1_function, plot_data, plot_settings)
     plotDisplayServer("plot2", plot2_function, plot_data, plot_settings)
-    plotDisplayServer("plot3", plot3_function, plot_data, plot_settings)  # NEW
-    
+    plotDisplayServer("plot3", plot3_function, plot_data, plot_settings)
   })
 }
+
